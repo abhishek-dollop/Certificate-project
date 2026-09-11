@@ -1,0 +1,61 @@
+/* Outer wrapper — centers the certificate and handles overflow on small screens */
+.certificate-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Inner certificate — fixed 800x560, scaled down on mobile */
+.certificate-inner {
+  position: relative;
+  width: 800px;
+  height: 560px;
+  background-color: #ffffff;
+  flex-shrink: 0;
+  transform-origin: top center;
+}
+
+/* Tablet — screens up to 860px */
+@media (max-width: 860px) {
+  .certificate-wrapper {
+    padding: 16px;
+  }
+  .certificate-inner {
+    transform: scale(0.85);
+    margin-bottom: -84px; /* compensate for scale gap at bottom */
+  }
+}
+
+/* Large mobile — screens up to 640px */
+@media (max-width: 640px) {
+  .certificate-wrapper {
+    padding: 12px;
+  }
+  .certificate-inner {
+    transform: scale(0.65);
+    margin-bottom: -196px;
+  }
+}
+
+/* Small mobile — screens up to 480px */
+@media (max-width: 480px) {
+  .certificate-wrapper {
+    padding: 8px;
+  }
+  .certificate-inner {
+    transform: scale(0.50);
+    margin-bottom: -280px;
+  }
+}
+
+/* Very small — screens up to 360px */
+@media (max-width: 360px) {
+  .certificate-inner {
+    transform: scale(0.40);
+    margin-bottom: -336px;
+  }
+}
