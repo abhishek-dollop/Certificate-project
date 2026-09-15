@@ -6,9 +6,9 @@ const Footer = ({
   officialWebsite = "https://www.renaissanceuniversity.edu.in",
   logo = "https://renaissancetutorials.com/assets/logo.png",
   socialLinks = {
-    twitter: "https://twitter.com",
-    linkedin: "https://linkedin.com",
-    facebook: "https://facebook.com",
+    twitter: "https://x.com/RenaissanceUniv",
+    linkedin: "https://www.linkedin.com/school/renaissance-university/",
+    facebook: "https://www.facebook.com/RenaissanceUniversity",
   },
   year = new Date().getFullYear(),
 }) => {

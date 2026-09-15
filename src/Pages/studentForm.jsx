@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import HeroSection from "../components/reusable/heroSection";
 import Footer from "../components/reusable/footer";
 import { getActiveSeminar, registerStudent } from "../services/seminarService";
+import Certificate from "./certificate";
 
 const STATES_CITIES = {
   "Madhya Pradesh": ["Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Dewas", "Satna", "Ratlam", "Rewa", "Murwara", "Singrauli", "Burhanpur", "Khandwa", "Bhind", "Chhindwara", "Guna", "Shivpuri", "Vidisha", "Chhatarpur"],
@@ -17,27 +18,21 @@ const STATES_CITIES = {
 };
 
 const EDUCATION_BOARDS = [
-  "CBSE (Central Board of Secondary Education)",
-  "ICSE (Indian Certificate of Secondary Education)",
-  "MP Board (Madhya Pradesh Board of Secondary Education)",
-  "UP Board (Uttar Pradesh Madhyamik Shiksha Parishad)",
-  "Rajasthan Board (RBSE)",
-  "Maharashtra Board (MSBSHSE)",
-  "Gujarat Board (GSEB)",
-  "Bihar Board (BSEB)",
-  "Jharkhand Board (JAC)",
-  "CGBSE (Chhattisgarh Board)",
-  "Other State Board",
+  { label: "CBSE (Central Board of Secondary Education)", value: "CBSE" },
+  { label: "ICSE (Indian Certificate of Secondary Education)", value: "ICSE" },
+  { label: "MP Board (Madhya Pradesh Board)", value: "MP_BOARD" },
+  { label: "UP Board (Uttar Pradesh Madhyamik Shiksha Parishad)", value: "UP_BOARD" },
+  { label: "Rajasthan Board (RBSE)", value: "RBSE" },
+  { label: "Other State Board", value: "OTHER" },
 ];
 
 const STREAMS = [
-  "Science (PCM) – Physics, Chemistry, Maths",
-  "Science (PCB) – Physics, Chemistry, Biology",
-  "Science (PCMB) – Physics, Chemistry, Maths & Biology",
-  "Commerce (with Maths)",
-  "Commerce (without Maths)",
-  "Arts / Humanities",
-  "Vocational / Other",
+  { label: "Science (PCM) – Physics, Chemistry, Maths", value: "PCM" },
+  { label: "Science (PCB) – Physics, Chemistry, Biology", value: "PCB" },
+  { label: "Commerce", value: "COMMERCE" },
+  { label: "Arts / Humanities", value: "ARTS" },
+  { label: "Agriculture", value: "AGRICULTURE" },
+  { label: "Other", value: "OTHER" },
 ];
 
 const StudentForm = () => {
@@ -64,6 +59,8 @@ const StudentForm = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [registration, setRegistration] = useState(null); // holds API response data
+  const [downloading, setDownloading] = useState(false);
+  const certRef = useRef(null);
 
   // ── fetch active seminar on mount ──────────────────────────────────────────
   useEffect(() => {
@@ -282,17 +279,46 @@ const StudentForm = () => {
             </div>
 
             {/* Download button */}
-            <a
-              href={`${import.meta.env.VITE_API_BASE_URL}/registrations/${registration.id}/certificate`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-bold text-sm rounded-xl py-4 flex items-center justify-center gap-2 transition-colors"
+            <button
+              onClick={async () => {
+                setDownloading(true);
+                try {
+                  const html2canvas = (await import("html2canvas")).default;
+                  const { jsPDF } = await import("jspdf");
+                  const canvas = await html2canvas(certRef.current, { scale: 2, useCORS: true });
+                  const imgData = canvas.toDataURL("image/png");
+                  const pdf = new jsPDF({ orientation: "landscape", unit: "px", format: [canvas.width / 2, canvas.height / 2] });
+                  pdf.addImage(imgData, "PNG", 0, 0, canvas.width / 2, canvas.height / 2);
+                  pdf.save(`certificate-${registration.certificateId}.pdf`);
+                } finally {
+                  setDownloading(false);
+                }
+              }}
+              disabled={downloading}
+              className="w-full bg-green-600 hover:bg-green-700 active:bg-green-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm rounded-xl py-4 flex items-center justify-center gap-2 transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9z" />
-              </svg>
-              Download Certificate (PDF)
-            </a>
+              {downloading ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                  Generating PDF…
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9z" />
+                  </svg>
+                  Download Certificate (PDF)
+                </>
+              )}
+            </button>
+
+            {/* Hidden certificate for PDF rendering */}
+            <div style={{ position: "fixed", top: "-9999px", left: "-9999px", width: "800px", height: "560px", overflow: "hidden" }}>
+              <Certificate ref={certRef} registration={registration} />
+            </div>
 
           </div>
         </div>
@@ -310,7 +336,7 @@ const StudentForm = () => {
         <div className="bg-white rounded-2xl shadow-md px-8 py-9">
 
           {/* Seminar info banner */}
-          {seminar && (
+          {/* {seminar && (
             <div className="mb-6 rounded-xl bg-indigo-50 border border-indigo-100 px-5 py-4 flex gap-4 items-start">
               <div className="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <svg className="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
@@ -323,7 +349,7 @@ const StudentForm = () => {
                 <p className="text-xs text-gray-500 mt-1 leading-relaxed">{seminar.description}</p>
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Form header */}
           <div className="flex items-center gap-3 mb-7">
@@ -365,7 +391,7 @@ const StudentForm = () => {
 
               {/* Mobile Number */}
               <div>
-                <Label required>Mobile Number</Label>
+                <Label>Mobile Number</Label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                     <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
@@ -391,7 +417,7 @@ const StudentForm = () => {
               {/* WhatsApp Number */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <Label required>WhatsApp Number</Label>
+                  <Label>WhatsApp Number</Label>
                   <label className="flex items-center gap-1.5 cursor-pointer select-none">
                     <input
                       type="checkbox"
@@ -425,7 +451,7 @@ const StudentForm = () => {
 
               {/* Email Address */}
               <div>
-                <Label required>Email Address</Label>
+                <Label>Email Address</Label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                     <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
@@ -485,7 +511,7 @@ const StudentForm = () => {
                   >
                     <option value="">Select your board</option>
                     {EDUCATION_BOARDS.map((b) => (
-                      <option key={b} value={b}>{b}</option>
+                      <option key={b.value} value={b.value}>{b.label}</option>
                     ))}
                   </select>
                   <span className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
@@ -514,7 +540,7 @@ const StudentForm = () => {
                   >
                     <option value="">Select your stream</option>
                     {STREAMS.map((s) => (
-                      <option key={s} value={s}>{s}</option>
+                      <option key={s.value} value={s.value}>{s.label}</option>
                     ))}
                   </select>
                   <span className="absolute inset-y-0 right-3 flex items-center pointer-events-none">

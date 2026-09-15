@@ -1,12 +1,21 @@
+import { forwardRef } from 'react'
 import leftbase from '../assets/png/leftbase.png'
 import ruLogo from '../assets/png/RU Logo.png'
 import seal from '../assets/png/3 2.png'
 import './certificate.css'
+ import webinarLogo from '../assets/png/IHAA.png'
 
-const Certificate = () => {
+const Certificate = forwardRef(({ registration }, ref) => {
+  const name = registration?.fullName ?? ''
+  const seminarTitle = registration?.seminarTitle ?? ''
+  const certificateId = registration?.certificateId ?? ''
+  const issueDate = registration?.issueDate
+    ? new Date(registration.issueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })
+    : new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })
+
   return (
     <div className="certificate-wrapper">
-      <div className="certificate-inner">
+      <div className="certificate-inner" ref={ref}>
         
         {/* Left Base Decorative Image */}
         <img
@@ -14,7 +23,7 @@ const Certificate = () => {
           alt="left base"
           style={{
             position: "absolute",
-            top: "10px",
+            top: "9px",
             left: "-28px",
             width: "495px",
             height: "550px",
@@ -106,9 +115,9 @@ const Certificate = () => {
           }}
         >
           <div>This certificate is proudly presented to</div>
-          <div style={{ borderBottom: "1.5px solid #05003E", width: "280px" }} />
+          <div style={{ borderBottom: "1.5px solid #05003E", width: "280px", paddingBottom: "7px", fontWeight: 600 }}>{name}</div>
           <div>for actively participating in</div>
-          <div style={{ borderBottom: "1.5px solid #05003E", width: "220px" }} />
+          <div style={{ borderBottom: "1.5px solid #05003E", width: "420px", paddingBottom: "6px", fontWeight: 600, fontSize: "18px" }}>{seminarTitle}</div>
         </div>
 
         {/* Bottom Footer — Certificate ID & Issue Date */}
@@ -128,8 +137,8 @@ const Certificate = () => {
             zIndex: 2,
           }}
         >
-          <span>Certificate ID:</span>
-          <span>Issue Date:</span>
+          <span>Certificate ID: {certificateId}</span>
+          <span>Issue Date: {issueDate}</span>
         </div>
 
         {/* Seal / Stamp */}
@@ -183,8 +192,8 @@ const Certificate = () => {
 
           {/* Right Logo */}
           <img
-            src={ruLogo}
-            alt="RU Logo"
+            src={webinarLogo}
+            alt="webinarLogo"
             style={{
               width: "90px",
               height: "90px",
@@ -196,7 +205,9 @@ const Certificate = () => {
       </div>
     </div>
   );
-};
+});
+
+Certificate.displayName = 'Certificate';
 
 export default Certificate;
 

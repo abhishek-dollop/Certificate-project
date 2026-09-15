@@ -1,13 +1,31 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getActiveSeminar } from "../../services/seminarService";
 
-const HeroSection = ({
-  title = "AI For Business Workshop",
-  subtitle = "Work Smarter, Grow Faster",
-  eventDate = "August 6, 2026",
-  venue = "Renaissance University...",
-  organizer = "Renaissance University, Indore (M.P.)",
-  logo = 'https://renaissancetutorials.com/assets/logo.png',
-}) => {
+const HeroSection = ({ logo = "https://renaissancetutorials.com/assets/logo.png" }) => {
+  const [seminar, setSeminar] = useState(null);
+
+  useEffect(() => {
+    getActiveSeminar()
+      .then((data) => setSeminar(data))
+      .catch((err) => console.error("Failed to fetch seminar:", err));
+  }, []);
+
+  // Format ISO date string to readable format e.g. "September 15, 2026"
+  const formatDate = (isoString) => {
+    if (!isoString) return "";
+    return new Date(isoString).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const title = seminar?.title ?? "";
+  const eventDate = seminar ? formatDate(seminar.seminarDate) : "";
+  const venue = seminar?.venue ?? "";
+  const organizer = seminar?.organizer ?? "";
+  const description = seminar?.description ?? "";
+
   return (
     <section className="bg-gradient-to-br from-[#c8e6c0] via-[#d9f0d3] to-[#b2d9a8]  px-12 py-10 flex items-center justify-between gap-6 flex-wrap rounded-md">
       
@@ -16,15 +34,11 @@ const HeroSection = ({
         <h1 className="text-[2.2rem] font-extrabold text-[#2b7818] leading-tight mb-2">
           {title}
         </h1>
-        <p className="text-base text-gray-500 mb-3">{subtitle}</p>
 
         {/* Description */}
         <div className="mb-7">
-          <h2 className="text-[1.05rem] font-bold text-gray-800 mb-1">
-            Career Guidance &amp; Higher Education Awareness Seminar 2026
-          </h2>
           <p className="text-sm text-gray-500 leading-relaxed">
-            Renaissance University organizes career awareness and higher education guidance seminars for Class 12th students across Madhya Pradesh schools. Students who attended the seminar can register here to receive their official participation certificate.
+            {description}
           </p>
         </div>
 
