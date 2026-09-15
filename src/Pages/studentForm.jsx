@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import HeroSection from "../components/reusable/heroSection";
 import Footer from "../components/reusable/footer";
-import { getActiveSeminar, registerStudent } from "../services/seminarService";
-import Certificate from "./certificate";
+import { getActiveSeminar, registerStudent, uploadAndEmailCertificate } from "../services/seminarService";
+import { generateCertificatePDF, preloadCertificateAssets, getCertificatePDFBlob } from "../services/pdfGenerator";
 
 const STATES_CITIES = {
   "Madhya Pradesh": ["Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Dewas", "Satna", "Ratlam", "Rewa", "Murwara", "Singrauli", "Burhanpur", "Khandwa", "Bhind", "Chhindwara", "Guna", "Shivpuri", "Vidisha", "Chhatarpur"],
@@ -60,10 +60,32 @@ const StudentForm = () => {
   const [submitError, setSubmitError] = useState("");
   const [registration, setRegistration] = useState(null); // holds API response data
   const [downloading, setDownloading] = useState(false);
-  const certRef = useRef(null);
+  const [emailStatus, setEmailStatus] = useState("idle"); // "idle" | "sending" | "sent" | "failed"
+  const [emailError, setEmailError] = useState("");
+
+  const sendCertificateEmail = async (regData) => {
+    if (!regData || !regData.certificateId) return;
+    setEmailStatus("sending");
+    setEmailError("");
+    try {
+      const pdfBlob = await getCertificatePDFBlob(regData);
+      await uploadAndEmailCertificate(
+        regData.certificateId,
+        regData.email,
+        pdfBlob,
+        regData.fullName
+      );
+      setEmailStatus("sent");
+    } catch (err) {
+      console.error("Failed to upload and email certificate:", err);
+      setEmailStatus("failed");
+      setEmailError(err.message || "Failed to deliver email");
+    }
+  };
 
   // ── fetch active seminar on mount ──────────────────────────────────────────
   useEffect(() => {
+    preloadCertificateAssets().catch(console.warn);
     const fetchSeminar = async () => {
       try {
         const data = await getActiveSeminar();
@@ -154,6 +176,7 @@ const StudentForm = () => {
     try {
       const data = await registerStudent(payload);
       setRegistration(data);
+      sendCertificateEmail(data);
     } catch (err) {
       setSubmitError(err.message);
     } finally {
@@ -267,35 +290,76 @@ const StudentForm = () => {
               <DetailRow label="CERTIFICATE ID" value={registration.certificateId} mono accent />
             </div>
 
-            {/* Email notice */}
-            <div className="flex items-start gap-3 bg-green-50 border border-green-100 rounded-xl px-4 py-3.5 mb-5">
-              <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-              </svg>
-              <p className="text-xs text-green-800 leading-relaxed">
-                <span className="font-bold">Certificate sent to your email!</span> A copy of your certificate has been
-                dispatched to <span className="font-semibold">{registration.email}</span>. Check your inbox (and spam folder).
-              </p>
-            </div>
+            {/* Email status notice */}
+            {emailStatus === "sending" && (
+              <div className="flex items-center gap-3 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3.5 mb-5 text-xs text-indigo-800">
+                <svg className="w-5 h-5 animate-spin text-indigo-600 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+                <p className="leading-relaxed">
+                  <span className="font-bold">Dispatching your certificate…</span> Generating high-resolution vector PDF and sending to{" "}
+                  <span className="font-semibold">{registration.email}</span>.
+                </p>
+              </div>
+            )}
+
+            {emailStatus === "sent" && (
+              <div className="flex items-start gap-3 bg-green-50 border border-green-100 rounded-xl px-4 py-3.5 mb-5">
+                <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                </svg>
+                <p className="text-xs text-green-800 leading-relaxed">
+                  <span className="font-bold">Certificate sent to your email!</span> An official vector PDF copy has been
+                  dispatched to <span className="font-semibold">{registration.email}</span>. Check your inbox.
+                </p>
+              </div>
+            )}
+
+            {emailStatus === "failed" && (
+              <div className="flex items-center justify-between gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5 text-xs text-amber-800">
+                <div className="flex items-start gap-2">
+                  <svg className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                  <span>Could not auto-deliver email{emailError ? `: ${emailError}` : ''}. You can download below or retry.</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => sendCertificateEmail(registration)}
+                  className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg text-xs transition-colors flex-shrink-0 cursor-pointer"
+                >
+                  Retry Email
+                </button>
+              </div>
+            )}
+
+            {emailStatus === "idle" && (
+              <div className="flex items-start gap-3 bg-green-50 border border-green-100 rounded-xl px-4 py-3.5 mb-5">
+                <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                </svg>
+                <p className="text-xs text-green-800 leading-relaxed">
+                  <span className="font-bold">Certificate issued!</span> A copy will be dispatched to{" "}
+                  <span className="font-semibold">{registration.email}</span>.
+                </p>
+              </div>
+            )}
 
             {/* Download button */}
             <button
               onClick={async () => {
                 setDownloading(true);
                 try {
-                  const html2canvas = (await import("html2canvas")).default;
-                  const { jsPDF } = await import("jspdf");
-                  const canvas = await html2canvas(certRef.current, { scale: 2, useCORS: true });
-                  const imgData = canvas.toDataURL("image/png");
-                  const pdf = new jsPDF({ orientation: "landscape", unit: "px", format: [canvas.width / 2, canvas.height / 2] });
-                  pdf.addImage(imgData, "PNG", 0, 0, canvas.width / 2, canvas.height / 2);
-                  pdf.save(`certificate-${registration.certificateId}.pdf`);
+                  await generateCertificatePDF(registration);
+                } catch (err) {
+                  console.error("PDF generation failed:", err);
                 } finally {
                   setDownloading(false);
                 }
               }}
               disabled={downloading}
-              className="w-full bg-green-600 hover:bg-green-700 active:bg-green-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm rounded-xl py-4 flex items-center justify-center gap-2 transition-colors"
+              className="w-full bg-green-600 hover:bg-green-700 active:bg-green-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm rounded-xl py-4 flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
               {downloading ? (
                 <>
@@ -314,11 +378,6 @@ const StudentForm = () => {
                 </>
               )}
             </button>
-
-            {/* Hidden certificate for PDF rendering */}
-            <div style={{ position: "fixed", top: "-9999px", left: "-9999px", width: "800px", height: "560px", overflow: "hidden" }}>
-              <Certificate ref={certRef} registration={registration} />
-            </div>
 
           </div>
         </div>

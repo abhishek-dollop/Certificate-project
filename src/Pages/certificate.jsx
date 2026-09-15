@@ -3,7 +3,8 @@ import leftbase from '../assets/png/leftbase.png'
 import ruLogo from '../assets/png/RU Logo.png'
 import seal from '../assets/png/3 2.png'
 import './certificate.css'
- import webinarLogo from '../assets/png/IHAA.png'
+import webinarLogo from '../assets/png/IHAA.png'
+import watermark from '../assets/png/watermark.png'
 
 const Certificate = forwardRef(({ registration }, ref) => {
   const name = registration?.fullName ?? ''
@@ -52,15 +53,15 @@ const Certificate = forwardRef(({ registration }, ref) => {
 
         {/* Watermark */}
         <img
-          src="https://renaissancetutorials.com/assets/logo.png"
+          src={watermark}
           alt="watermark"
           style={{
             position: "absolute",
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: "700px",
-            opacity: 0.2,
+            width: "560px",
+            opacity: 0.15,
             pointerEvents: "none",
             userSelect: "none",
           }}
@@ -166,7 +167,7 @@ const Certificate = forwardRef(({ registration }, ref) => {
             transform: "translateX(-50%)",
             display: "flex",
             alignItems: "center",
-            gap: "20px",
+            gap: "24px",
             zIndex: 2,
           }}
         >
@@ -175,8 +176,8 @@ const Certificate = forwardRef(({ registration }, ref) => {
             src={ruLogo}
             alt="RU Logo"
             style={{
-              width: "90px",
-              height: "90px",
+              height: "80px",
+              width: "auto",
               objectFit: "contain",
             }}
           />
@@ -185,7 +186,7 @@ const Certificate = forwardRef(({ registration }, ref) => {
           <div
             style={{
               width: "2px",
-              height: "67px",
+              height: "65px",
               backgroundColor: "#333",
             }}
           />
@@ -195,8 +196,8 @@ const Certificate = forwardRef(({ registration }, ref) => {
             src={webinarLogo}
             alt="webinarLogo"
             style={{
-              width: "90px",
-              height: "90px",
+              height: "80px",
+              width: "auto",
               objectFit: "contain",
             }}
           />
