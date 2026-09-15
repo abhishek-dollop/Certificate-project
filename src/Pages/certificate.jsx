@@ -3,7 +3,7 @@ import leftbase from '../assets/png/leftbase.png'
 import ruLogo from '../assets/png/RU Logo.png'
 import seal from '../assets/png/3 2.png'
 import './certificate.css'
- import webinarLogo from '../assets/png/IHA.png'
+ import webinarLogo from '../assets/png/IHAA.png'
 
 const Certificate = forwardRef(({ registration }, ref) => {
   const name = registration?.fullName ?? ''
