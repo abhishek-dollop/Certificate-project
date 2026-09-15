@@ -3,6 +3,7 @@ import leftbase from '../assets/png/leftbase.png'
 import ruLogo from '../assets/png/RU Logo.png'
 import seal from '../assets/png/3 2.png'
 import './certificate.css'
+ import webinarLogo from '../assets/png/IHA.png'
 
 const Certificate = forwardRef(({ registration }, ref) => {
   const name = registration?.fullName ?? ''
@@ -22,7 +23,7 @@ const Certificate = forwardRef(({ registration }, ref) => {
           alt="left base"
           style={{
             position: "absolute",
-            top: "10px",
+            top: "9px",
             left: "-28px",
             width: "495px",
             height: "550px",
@@ -114,7 +115,7 @@ const Certificate = forwardRef(({ registration }, ref) => {
           }}
         >
           <div>This certificate is proudly presented to</div>
-          <div style={{ borderBottom: "1.5px solid #05003E", width: "280px", paddingBottom: "6px", fontWeight: 600 }}>{name}</div>
+          <div style={{ borderBottom: "1.5px solid #05003E", width: "280px", paddingBottom: "7px", fontWeight: 600 }}>{name}</div>
           <div>for actively participating in</div>
           <div style={{ borderBottom: "1.5px solid #05003E", width: "420px", paddingBottom: "6px", fontWeight: 600, fontSize: "18px" }}>{seminarTitle}</div>
         </div>
@@ -191,8 +192,8 @@ const Certificate = forwardRef(({ registration }, ref) => {
 
           {/* Right Logo */}
           <img
-            src={ruLogo}
-            alt="RU Logo"
+            src={webinarLogo}
+            alt="webinarLogo"
             style={{
               width: "90px",
               height: "90px",

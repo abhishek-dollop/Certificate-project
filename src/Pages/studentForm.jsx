@@ -391,7 +391,7 @@ const StudentForm = () => {
 
               {/* Mobile Number */}
               <div>
-                <Label required>Mobile Number</Label>
+                <Label>Mobile Number</Label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                     <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
@@ -417,7 +417,7 @@ const StudentForm = () => {
               {/* WhatsApp Number */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <Label required>WhatsApp Number</Label>
+                  <Label>WhatsApp Number</Label>
                   <label className="flex items-center gap-1.5 cursor-pointer select-none">
                     <input
                       type="checkbox"
@@ -451,7 +451,7 @@ const StudentForm = () => {
 
               {/* Email Address */}
               <div>
-                <Label required>Email Address</Label>
+                <Label>Email Address</Label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                     <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
