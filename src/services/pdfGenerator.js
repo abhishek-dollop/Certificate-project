@@ -158,24 +158,26 @@ export async function buildCertificateDoc(registration = {}) {
   doc.text('CERTIFICATE OF PARTICIPATION', 400, 204, { align: 'center' });
 
   // 7. Presented To Section
-  doc.setFontSize(16.5); // ~22px
-  doc.text('This certificate is proudly presented to', 400, 258, { align: 'center' });
+  doc.setFontSize(15); // ~20px
+  doc.text('This certificate is proudly presented to', 400, 252, { align: 'center' });
 
   // Student Full Name (Vector text + crisp vector underline)
-  doc.setFontSize(17.5);
-  doc.text(name, 400, 298, { align: 'center' });
+  doc.setFontSize(24); // ~32px
+  doc.text(name, 400, 296, { align: 'center' });
   doc.setDrawColor(5, 0, 62); // #05003E
-  doc.setLineWidth(1.5);
-  doc.line(400 - 140, 306, 400 + 140, 306);
+  doc.setLineWidth(2);
+  const calculatedNameWidth = Math.max(260, Math.min(460, (doc.getTextWidth(name) || 0) + 60));
+  doc.line(400 - calculatedNameWidth / 2, 305, 400 + calculatedNameWidth / 2, 305);
 
   // Participation subtitle
-  doc.setFontSize(16.5); // ~22px
-  doc.text('for actively participating in', 400, 345, { align: 'center' });
+  doc.setFontSize(15); // ~20px
+  doc.text('for actively participating in', 400, 344, { align: 'center' });
 
   // Seminar Title (Vector text + crisp vector underline)
-  doc.setFontSize(13.5); // ~18px
-  doc.text(seminarTitle, 400, 384, { align: 'center', maxWidth: 410 });
-  doc.line(400 - 210, 392, 400 + 210, 392);
+  doc.setFontSize(18); // ~24px
+  doc.text(seminarTitle, 400, 384, { align: 'center', maxWidth: 540 });
+  const calculatedTitleWidth = Math.max(360, Math.min(540, (doc.getTextWidth(seminarTitle) || 0) + 40));
+  doc.line(400 - calculatedTitleWidth / 2, 394, 400 + calculatedTitleWidth / 2, 394);
 
   // 8. Seal / Stamp (High-resolution PNG embedded at exact coordinates)
   if (seal?.dataUrl) {

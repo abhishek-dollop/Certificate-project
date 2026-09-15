@@ -95,15 +95,15 @@ const Certificate = forwardRef(({ registration }, ref) => {
         <div
           style={{
             position: "absolute",
-            top: "240px",
+            top: "235px",
             left: "50%",
             transform: "translateX(-50%)",
-            width: "669px",
-            height: "171px",
+            width: "680px",
+            height: "185px",
             fontFamily: "Lustria, serif",
             fontWeight: 400,
-            fontSize: "22px",
-            lineHeight: "25px",
+            fontSize: "20px",
+            lineHeight: "26px",
             letterSpacing: "0%",
             textAlign: "center",
             color: "#05003E",
@@ -111,14 +111,45 @@ const Certificate = forwardRef(({ registration }, ref) => {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: "18px",
+            gap: "14px",
             zIndex: 2,
           }}
         >
-          <div>This certificate is proudly presented to</div>
-          <div style={{ borderBottom: "1.5px solid #05003E", width: "280px", paddingBottom: "7px", fontWeight: 600 }}>{name}</div>
-          <div>for actively participating in</div>
-          <div style={{ borderBottom: "1.5px solid #05003E", width: "420px", paddingBottom: "6px", fontWeight: 600, fontSize: "18px" }}>{seminarTitle}</div>
+          <div style={{ fontSize: "20px" }}>This certificate is proudly presented to</div>
+          <div
+            style={{
+              borderBottom: "2px solid #05003E",
+              minWidth: "320px",
+              maxWidth: "560px",
+              paddingLeft: "24px",
+              paddingRight: "24px",
+              paddingBottom: "5px",
+              fontWeight: 700,
+              fontSize: "32px",
+              lineHeight: "36px",
+              color: "#05003E",
+            }}
+          >
+            {name}
+          </div>
+          <div style={{ fontSize: "20px" }}>for actively participating in</div>
+          <div
+            style={{
+              borderBottom: "2px solid #05003E",
+              minWidth: "440px",
+              maxWidth: "620px",
+              paddingLeft: "20px",
+              paddingRight: "20px",
+              paddingBottom: "5px",
+              fontWeight: 700,
+              fontSize: "24px",
+              lineHeight: "30px",
+              color: "#05003E",
+              letterSpacing: "0.3px",
+            }}
+          >
+            {seminarTitle}
+          </div>
         </div>
 
         {/* Bottom Footer — Certificate ID & Issue Date */}
